@@ -280,6 +280,10 @@ func validateCreateInput(input CreateInput) (CreateInput, error) {
 	input.Title = strings.TrimSpace(input.Title)
 	input.Description = strings.TrimSpace(input.Description)
 
+	if input.RecurrenceType != "" && input.RecurrenceData == nil {
+		return CreateInput{}, fmt.Errorf("%w: recurrence data required", ErrInvalidInput)
+	}
+
 	if input.Title == "" {
 		return CreateInput{}, fmt.Errorf("%w: title is required", ErrInvalidInput)
 	}

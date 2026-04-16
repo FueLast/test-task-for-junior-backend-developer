@@ -129,6 +129,9 @@ func (s *Service) generateMonthly(base *taskdomain.Task) []taskdomain.Task {
 
 			date := time.Date(current.Year(), current.Month(), day, 0, 0, 0, 0, time.UTC)
 
+			if date.Month() != current.Month() {
+				continue
+			}
 			t := *base
 			t.CreatedAt = date
 			t.UpdatedAt = date

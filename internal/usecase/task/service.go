@@ -10,10 +10,14 @@ import (
 	taskdomain "example.com/taskservice/internal/domain/task"
 )
 
+// maxOccurrences limits number of generated tasks
+// to prevent uncontrolled data growth.
 const (
 	maxOccurrences = 30
 )
 
+// Service implements business logic for task management,
+// including recurrence rules processing and task generation.
 type Service struct {
 	repo Repository
 	now  func() time.Time
@@ -71,6 +75,8 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (*taskdomain.Ta
 	return lastCreated, nil
 }
 
+// generateTasks creates task instances based on recurrence rules.
+// If no recurrence is specified, returns a single task.
 func (s *Service) generateTasks(base *taskdomain.Task) []taskdomain.Task {
 	switch base.RecurrenceType {
 	case taskdomain.RecurrenceDaily:
@@ -86,6 +92,8 @@ func (s *Service) generateTasks(base *taskdomain.Task) []taskdomain.Task {
 	}
 }
 
+// generateDaily creates tasks with a fixed day interval.
+// Example: every 2 days.
 func (s *Service) generateDaily(base *taskdomain.Task) []taskdomain.Task {
 	var result []taskdomain.Task
 	seen := make(map[string]bool)
@@ -119,6 +127,8 @@ func (s *Service) generateDaily(base *taskdomain.Task) []taskdomain.Task {
 	return result
 }
 
+// generateMonthly creates tasks for specific days of the month.
+// Invalid dates (e.g., Feb 30) are skipped.
 func (s *Service) generateMonthly(base *taskdomain.Task) []taskdomain.Task {
 	var result []taskdomain.Task
 	seen := make(map[string]bool)
@@ -163,6 +173,7 @@ func (s *Service) generateMonthly(base *taskdomain.Task) []taskdomain.Task {
 	return result
 }
 
+// generateSpecific creates tasks for explicitly provided dates.
 func (s *Service) generateSpecific(base *taskdomain.Task) []taskdomain.Task {
 	var result []taskdomain.Task
 	seen := make(map[string]bool)
@@ -197,6 +208,7 @@ func (s *Service) generateSpecific(base *taskdomain.Task) []taskdomain.Task {
 	return result
 }
 
+// generateOddEven creates tasks only on odd or even days.
 func (s *Service) generateOddEven(base *taskdomain.Task) []taskdomain.Task {
 	var result []taskdomain.Task
 	seen := make(map[string]bool)
@@ -206,6 +218,10 @@ func (s *Service) generateOddEven(base *taskdomain.Task) []taskdomain.Task {
 	}
 
 	if err := json.Unmarshal([]byte(base.RecurrenceData), &data); err != nil {
+		return []taskdomain.Task{*base}
+	}
+
+	if data.Type != "even" && data.Type != "odd" {
 		return []taskdomain.Task{*base}
 	}
 

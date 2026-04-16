@@ -28,8 +28,8 @@ type Task struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 
-	RecurrenceType string
-	RecurrenceData string
+	RecurrenceType RecurrenceType `json:"recurrence_type"`
+	RecurrenceData string         `json:"recurrence_data"`
 }
 
 func (s Status) Valid() bool {

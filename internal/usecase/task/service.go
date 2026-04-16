@@ -84,6 +84,7 @@ func (s *Service) generateTasks(base *taskdomain.Task) []taskdomain.Task {
 
 func (s *Service) generateDaily(base *taskdomain.Task) []taskdomain.Task {
 	var result []taskdomain.Task
+	seen := make(map[string]bool)
 
 	var data struct {
 		Interval int `json:"interval"`
@@ -102,6 +103,12 @@ func (s *Service) generateDaily(base *taskdomain.Task) []taskdomain.Task {
 		t.CreatedAt = base.CreatedAt.AddDate(0, 0, i*data.Interval)
 		t.UpdatedAt = t.CreatedAt
 
+		key := t.CreatedAt.Format("2006-01-02")
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+
 		result = append(result, t)
 	}
 
@@ -110,6 +117,7 @@ func (s *Service) generateDaily(base *taskdomain.Task) []taskdomain.Task {
 
 func (s *Service) generateMonthly(base *taskdomain.Task) []taskdomain.Task {
 	var result []taskdomain.Task
+	seen := make(map[string]bool)
 
 	var data struct {
 		Days []int `json:"days"`
@@ -136,6 +144,12 @@ func (s *Service) generateMonthly(base *taskdomain.Task) []taskdomain.Task {
 			t.CreatedAt = date
 			t.UpdatedAt = date
 
+			key := t.CreatedAt.Format("2006-01-02")
+			if seen[key] {
+				continue
+			}
+			seen[key] = true
+
 			result = append(result, t)
 		}
 
@@ -147,6 +161,7 @@ func (s *Service) generateMonthly(base *taskdomain.Task) []taskdomain.Task {
 
 func (s *Service) generateSpecific(base *taskdomain.Task) []taskdomain.Task {
 	var result []taskdomain.Task
+	seen := make(map[string]bool)
 
 	var data struct {
 		Dates []string `json:"dates"`
@@ -166,6 +181,12 @@ func (s *Service) generateSpecific(base *taskdomain.Task) []taskdomain.Task {
 		t.CreatedAt = parsed
 		t.UpdatedAt = parsed
 
+		key := t.CreatedAt.Format("2006-01-02")
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+
 		result = append(result, t)
 	}
 
@@ -174,6 +195,7 @@ func (s *Service) generateSpecific(base *taskdomain.Task) []taskdomain.Task {
 
 func (s *Service) generateOddEven(base *taskdomain.Task) []taskdomain.Task {
 	var result []taskdomain.Task
+	seen := make(map[string]bool)
 
 	var data struct {
 		Type string `json:"type"`
@@ -192,6 +214,12 @@ func (s *Service) generateOddEven(base *taskdomain.Task) []taskdomain.Task {
 			t := *base
 			t.CreatedAt = current
 			t.UpdatedAt = current
+
+			key := t.CreatedAt.Format("2006-01-02")
+			if seen[key] {
+				continue
+			}
+			seen[key] = true
 
 			result = append(result, t)
 		}

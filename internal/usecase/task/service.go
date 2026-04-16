@@ -89,7 +89,9 @@ func (s *Service) generateDaily(base *taskdomain.Task) []taskdomain.Task {
 		Interval int `json:"interval"`
 	}
 
-	_ = json.Unmarshal([]byte(base.RecurrenceData), &data)
+	if err := json.Unmarshal([]byte(base.RecurrenceData), &data); err != nil {
+		return []taskdomain.Task{*base}
+	}
 
 	if data.Interval <= 0 {
 		data.Interval = 1
@@ -113,7 +115,9 @@ func (s *Service) generateMonthly(base *taskdomain.Task) []taskdomain.Task {
 		Days []int `json:"days"`
 	}
 
-	_ = json.Unmarshal([]byte(base.RecurrenceData), &data)
+	if err := json.Unmarshal([]byte(base.RecurrenceData), &data); err != nil {
+		return []taskdomain.Task{*base}
+	}
 
 	current := base.CreatedAt
 
@@ -145,7 +149,9 @@ func (s *Service) generateSpecific(base *taskdomain.Task) []taskdomain.Task {
 		Dates []string `json:"dates"`
 	}
 
-	_ = json.Unmarshal([]byte(base.RecurrenceData), &data)
+	if err := json.Unmarshal([]byte(base.RecurrenceData), &data); err != nil {
+		return []taskdomain.Task{*base}
+	}
 
 	for _, d := range data.Dates {
 		parsed, err := time.Parse("2006-01-02", d)
@@ -170,7 +176,9 @@ func (s *Service) generateOddEven(base *taskdomain.Task) []taskdomain.Task {
 		Type string `json:"type"`
 	}
 
-	_ = json.Unmarshal([]byte(base.RecurrenceData), &data)
+	if err := json.Unmarshal([]byte(base.RecurrenceData), &data); err != nil {
+		return []taskdomain.Task{*base}
+	}
 
 	current := base.CreatedAt
 

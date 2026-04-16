@@ -49,6 +49,10 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (*taskdomain.Ta
 	model.CreatedAt = now
 	model.UpdatedAt = now
 
+	if model.RecurrenceType == "" {
+		return s.repo.Create(ctx, model)
+	}
+
 	tasks := s.generateTasks(model)
 
 	var lastCreated *taskdomain.Task

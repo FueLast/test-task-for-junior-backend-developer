@@ -15,6 +15,15 @@ type taskMutationDTO struct {
 	RecurrenceData any    `json:"recurrence_data"`
 }
 
+type CreateTaskRequest struct {
+	Title       string            `json:"title"`
+	Description string            `json:"description"`
+	Status      taskdomain.Status `json:"status"`
+
+	RecurrenceType string `json:"recurrence_type"`
+	RecurrenceData any    `json:"recurrence_data"`
+}
+
 type taskDTO struct {
 	ID          int64             `json:"id"`
 	Title       string            `json:"title"`

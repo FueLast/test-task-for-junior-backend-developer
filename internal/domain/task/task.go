@@ -10,6 +10,16 @@ const (
 	StatusDone       Status = "done"
 )
 
+type RecurrenceType string
+
+const (
+	RecurrenceNone     RecurrenceType = ""
+	RecurrenceDaily    RecurrenceType = "daily"
+	RecurrenceMonthly  RecurrenceType = "monthly"
+	RecurrenceSpecific RecurrenceType = "specific"
+	RecurrenceOddEven  RecurrenceType = "odd_even"
+)
+
 type Task struct {
 	ID          int64     `json:"id"`
 	Title       string    `json:"title"`
@@ -17,6 +27,9 @@ type Task struct {
 	Status      Status    `json:"status"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
+
+	RecurrenceType string
+	RecurrenceData string
 }
 
 func (s Status) Valid() bool {

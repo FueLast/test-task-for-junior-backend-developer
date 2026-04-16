@@ -26,6 +26,9 @@ type CreateInput struct {
 	Title       string
 	Description string
 	Status      taskdomain.Status
+
+	RecurrenceType string
+	RecurrenceData any
 }
 
 type UpdateInput struct {

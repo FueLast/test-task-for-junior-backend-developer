@@ -39,6 +39,10 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (*taskdomain.Ta
 		RecurrenceType: taskdomain.RecurrenceType(input.RecurrenceType),
 	}
 
+	if input.RecurrenceType == "" {
+		input.RecurrenceData = nil
+	}
+
 	jsonBytes, err := json.Marshal(input.RecurrenceData)
 	if err != nil {
 		return nil, fmt.Errorf("%w: invalid recurrence data", ErrInvalidInput)

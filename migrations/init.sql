@@ -1,3 +1,5 @@
+\c taskservice;
+
 CREATE TABLE IF NOT EXISTS tasks (
 	id BIGSERIAL PRIMARY KEY,
 	title TEXT NOT NULL,
@@ -5,7 +7,6 @@ CREATE TABLE IF NOT EXISTS tasks (
 	status TEXT NOT NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
 	recurrence_type TEXT NOT NULL DEFAULT '',
 	recurrence_data JSONB
 );

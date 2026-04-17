@@ -51,7 +51,11 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (*taskdomain.Ta
 	if err != nil {
 		return nil, fmt.Errorf("%w: invalid recurrence data", ErrInvalidInput)
 	}
-	model.RecurrenceData = string(jsonBytes)
+	if input.RecurrenceData == nil {
+		model.RecurrenceData = "{}"
+	} else {
+		model.RecurrenceData = string(jsonBytes)
+	}
 
 	now := s.now()
 	model.CreatedAt = now

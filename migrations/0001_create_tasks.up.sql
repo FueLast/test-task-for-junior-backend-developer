@@ -4,7 +4,11 @@ CREATE TABLE IF NOT EXISTS tasks (
 	description TEXT NOT NULL DEFAULT '',
 	status TEXT NOT NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+	recurrence_type TEXT NOT NULL DEFAULT '',
+	recurrence_data JSONB
 );
 
 CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks (status);
+CREATE INDEX IF NOT EXISTS idx_tasks_recurrence_type ON tasks (recurrence_type);

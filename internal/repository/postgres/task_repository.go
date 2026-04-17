@@ -20,23 +20,39 @@ func New(pool *pgxpool.Pool) *Repository {
 
 func (r *Repository) Create(ctx context.Context, task *taskdomain.Task) (*taskdomain.Task, error) {
 	const query = `
-		INSERT INTO tasks (title, description, status, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id, title, description, status, created_at, updated_at
+		INSERT INTO tasks (
+			title, description, status,
+			created_at, updated_at,
+			recurrence_type, recurrence_data
+		)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		RETURNING 
+			id, title, description, status, 
+			created_at, updated_at,
+			recurrence_type, recurrence_data
 	`
 
-	row := r.pool.QueryRow(ctx, query, task.Title, task.Description, task.Status, task.CreatedAt, task.UpdatedAt)
-	created, err := scanTask(row)
-	if err != nil {
-		return nil, err
-	}
+	row := r.pool.QueryRow(
+		ctx,
+		query,
+		task.Title,
+		task.Description,
+		task.Status,
+		task.CreatedAt,
+		task.UpdatedAt,
+		task.RecurrenceType,
+		task.RecurrenceData,
+	)
 
-	return created, nil
+	return scanTask(row)
 }
 
 func (r *Repository) GetByID(ctx context.Context, id int64) (*taskdomain.Task, error) {
 	const query = `
-		SELECT id, title, description, status, created_at, updated_at
+		SELECT 
+    id, title, description, status, 
+    created_at, updated_at,
+    recurrence_type, recurrence_data
 		FROM tasks
 		WHERE id = $1
 	`
@@ -128,10 +144,11 @@ type taskScanner interface {
 }
 
 func scanTask(scanner taskScanner) (*taskdomain.Task, error) {
-	var (
-		task   taskdomain.Task
-		status string
-	)
+	var task taskdomain.Task
+	var status string
+
+	var recurrenceType string
+	var recurrenceData string
 
 	if err := scanner.Scan(
 		&task.ID,
@@ -140,11 +157,15 @@ func scanTask(scanner taskScanner) (*taskdomain.Task, error) {
 		&status,
 		&task.CreatedAt,
 		&task.UpdatedAt,
+		&recurrenceType,
+		&recurrenceData,
 	); err != nil {
 		return nil, err
 	}
 
 	task.Status = taskdomain.Status(status)
+	task.RecurrenceType = taskdomain.RecurrenceType(recurrenceType)
+	task.RecurrenceData = recurrenceData
 
 	return &task, nil
 }

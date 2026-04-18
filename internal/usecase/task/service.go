@@ -40,14 +40,14 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (*taskdomain.Ta
 		Title:          normalized.Title,
 		Description:    normalized.Description,
 		Status:         normalized.Status,
-		RecurrenceType: taskdomain.RecurrenceType(input.RecurrenceType),
+		RecurrenceType: taskdomain.RecurrenceType(normalized.RecurrenceType),
 	}
 
-	if input.RecurrenceType == "" {
-		input.RecurrenceData = nil
+	if normalized.RecurrenceType == "" {
+		normalized.RecurrenceData = nil
 	}
 
-	jsonBytes, err := json.Marshal(input.RecurrenceData)
+	jsonBytes, err := json.Marshal(normalized.RecurrenceData)
 	if err != nil {
 		return nil, fmt.Errorf("%w: invalid recurrence data", ErrInvalidInput)
 	}
@@ -320,7 +320,86 @@ func validateCreateInput(input CreateInput) (CreateInput, error) {
 		return CreateInput{}, fmt.Errorf("%w: invalid status", ErrInvalidInput)
 	}
 
+	if input.RecurrenceType != "" {
+		if err := validateRecurrence(input.RecurrenceType, input.RecurrenceData); err != nil {
+			return CreateInput{}, err
+		}
+	}
+
 	return input, nil
+}
+
+func validateRecurrence(rType string, data any) error {
+	if data == nil {
+		return fmt.Errorf("%w: recurrence data required", ErrInvalidInput)
+	}
+
+	raw, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("%w: invalid recurrence data format", ErrInvalidInput)
+	}
+
+	switch rType {
+
+	case string(taskdomain.RecurrenceDaily):
+		var d struct {
+			Interval int `json:"interval"`
+		}
+		if err := json.Unmarshal(raw, &d); err != nil {
+			return fmt.Errorf("%w: invalid daily format", ErrInvalidInput)
+		}
+		if d.Interval <= 0 {
+			return fmt.Errorf("%w: interval must be > 0", ErrInvalidInput)
+		}
+
+	case string(taskdomain.RecurrenceMonthly):
+		var d struct {
+			Days []int `json:"days"`
+		}
+		if err := json.Unmarshal(raw, &d); err != nil {
+			return fmt.Errorf("%w: invalid monthly format", ErrInvalidInput)
+		}
+		if len(d.Days) == 0 {
+			return fmt.Errorf("%w: days required", ErrInvalidInput)
+		}
+		for _, day := range d.Days {
+			if day < 1 || day > 31 {
+				return fmt.Errorf("%w: day must be between 1 and 31", ErrInvalidInput)
+			}
+		}
+
+	case string(taskdomain.RecurrenceSpecific):
+		var d struct {
+			Dates []string `json:"dates"`
+		}
+		if err := json.Unmarshal(raw, &d); err != nil {
+			return fmt.Errorf("%w: invalid specific format", ErrInvalidInput)
+		}
+		if len(d.Dates) == 0 {
+			return fmt.Errorf("%w: dates required", ErrInvalidInput)
+		}
+		for _, date := range d.Dates {
+			if _, err := time.Parse("2006-01-02", date); err != nil {
+				return fmt.Errorf("%w: invalid date format (use YYYY-MM-DD)", ErrInvalidInput)
+			}
+		}
+
+	case string(taskdomain.RecurrenceOddEven):
+		var d struct {
+			Type string `json:"type"`
+		}
+		if err := json.Unmarshal(raw, &d); err != nil {
+			return fmt.Errorf("%w: invalid odd/even format", ErrInvalidInput)
+		}
+		if d.Type != "odd" && d.Type != "even" {
+			return fmt.Errorf("%w: type must be 'odd' or 'even'", ErrInvalidInput)
+		}
+
+	default:
+		return fmt.Errorf("%w: unknown recurrence type", ErrInvalidInput)
+	}
+
+	return nil
 }
 
 func validateUpdateInput(input UpdateInput) (UpdateInput, error) {

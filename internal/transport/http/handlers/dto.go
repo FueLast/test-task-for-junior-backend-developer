@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"time"
 
 	taskdomain "example.com/taskservice/internal/domain/task"
@@ -12,7 +13,7 @@ type taskMutationDTO struct {
 	Status      taskdomain.Status `json:"status"`
 
 	RecurrenceType string `json:"recurrence_type"`
-	RecurrenceData any    `json:"recurrence_data"`
+	RecurrenceData json.RawMessage `json:"recurrence_data"`
 }
 
 type CreateTaskRequest struct {
@@ -33,7 +34,7 @@ type taskDTO struct {
 	UpdatedAt   time.Time         `json:"updated_at"`
 
 	RecurrenceType taskdomain.RecurrenceType `json:"recurrence_type"`
-	RecurrenceData string                    `json:"recurrence_data"`
+	RecurrenceData json.RawMessage `json:"recurrence_data"`
 }
 
 func newTaskDTO(task *taskdomain.Task) taskDTO {
@@ -45,6 +46,6 @@ func newTaskDTO(task *taskdomain.Task) taskDTO {
 		CreatedAt:      task.CreatedAt,
 		UpdatedAt:      task.UpdatedAt,
 		RecurrenceType: task.RecurrenceType,
-		RecurrenceData: task.RecurrenceData,
+		RecurrenceData: json.RawMessage(task.RecurrenceData),
 	}
 }

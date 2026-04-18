@@ -111,9 +111,12 @@ func (r *Repository) Delete(ctx context.Context, id int64) error {
 
 func (r *Repository) List(ctx context.Context) ([]taskdomain.Task, error) {
 	const query = `
-		SELECT id, title, description, status, created_at, updated_at
-		FROM tasks
-		ORDER BY id DESC
+	SELECT 
+		id, title, description, status, 
+		created_at, updated_at,
+		recurrence_type, recurrence_data
+	FROM tasks
+	ORDER BY id DESC
 	`
 
 	rows, err := r.pool.Query(ctx, query)

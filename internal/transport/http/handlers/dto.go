@@ -12,7 +12,7 @@ type taskMutationDTO struct {
 	Description string            `json:"description"`
 	Status      taskdomain.Status `json:"status"`
 
-	RecurrenceType string `json:"recurrence_type"`
+	RecurrenceType string          `json:"recurrence_type"`
 	RecurrenceData json.RawMessage `json:"recurrence_data"`
 }
 
@@ -34,10 +34,16 @@ type taskDTO struct {
 	UpdatedAt   time.Time         `json:"updated_at"`
 
 	RecurrenceType taskdomain.RecurrenceType `json:"recurrence_type"`
-	RecurrenceData json.RawMessage `json:"recurrence_data"`
+	RecurrenceData json.RawMessage           `json:"recurrence_data"`
 }
 
 func newTaskDTO(task *taskdomain.Task) taskDTO {
+	var raw json.RawMessage
+
+	if len(task.RecurrenceData) > 0 {
+		raw = json.RawMessage(task.RecurrenceData)
+	}
+
 	return taskDTO{
 		ID:             task.ID,
 		Title:          task.Title,
@@ -46,6 +52,6 @@ func newTaskDTO(task *taskdomain.Task) taskDTO {
 		CreatedAt:      task.CreatedAt,
 		UpdatedAt:      task.UpdatedAt,
 		RecurrenceType: task.RecurrenceType,
-		RecurrenceData: json.RawMessage(task.RecurrenceData),
+		RecurrenceData: raw,
 	}
 }
